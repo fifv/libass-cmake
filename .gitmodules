@@ -1,0 +1,15 @@
+[submodule "libass"]
+	path = libass
+	url = https://github.com/libass/libass
+[submodule "fribidi"]
+	path = fribidi
+	url = https://github.com/fribidi/fribidi
+[submodule "harfbuzz"]
+	path = harfbuzz
+	url = https://github.com/harfbuzz/harfbuzz
+[submodule "freetype"]
+	path = freetype
+	url = https://github.com/freetype/freetype
+[submodule "libunibreak"]
+	path = libunibreak
+	url = https://github.com/adah1972/libunibreak
