@@ -1,6 +1,6 @@
 # libass-cmake
 
-Build libass and its dependencies, all with CMake
+Build [libass](https://github.com/libass/libass) and its dependencies, all with CMake
 
 The purpose is to cross-compile to WebAssembly via emscripten
 
@@ -25,7 +25,7 @@ The purpose is to cross-compile to WebAssembly via emscripten
 
 ### Submodules
 1. [libass](https://github.com/libass/libass) - the main library
-2. [fribidi](https://github.com/fribidi/fribidi) - "Unicode Bidirectional Algorithm", required by libass, built with autotools, port to CMake
+2. [fribidi](https://github.com/fribidi/fribidi) - "Unicode Bidirectional Algorithm", required by libass, built with autotools, partitally port to CMake
 3. [harfbuzz](https://github.com/harfbuzz/harfbuzz) - Text Shaping, required by libass, support CMake natively
 4. [freetype](https://github.com/freetype/freetype) - Text Rendering, required by libass, support CMake natively
 5. [libunibreak](https://github.com/adah1972/libunibreak) - "Unicode line breaking", required by libass, built with autotools, port to CMake
@@ -33,5 +33,7 @@ The purpose is to cross-compile to WebAssembly via emscripten
 
 ### TODO
 - [ ] currently fribidi and libass' configurations are skipped and I put the generated `config.h` directly in `./configs/`, that's expected as I want control the configurations. But it may be broken someday, so it will be better to invent some method address this issue
+
+- [ ] actually build this with emscripten and built a backend in typescript which import this project to test functionality
 
 
