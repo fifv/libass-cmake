@@ -1,3 +1,10 @@
 {
-    
+    "yaml.schemas": {
+        "https://json.schemastore.org/clangd.json": "file:///home/fifv/c/libass-cmake/.clangd"
+    },
+    // "cmake.configureSettings": {
+    //     // "CMAKE_TOOLCHAIN_FILE": "/usr/lib/emscripten/cmake/Modules/Platform/Emscripten.cmake",
+    //     "CMAKE_CROSSCOMPILING_EMULATOR": "/usr/bin/node",
+    //     "CMAKE_CXX_FLAGS": "", // mold not used here, but cause warning
+    // },
 }

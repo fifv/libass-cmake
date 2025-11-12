@@ -1,0 +1,6 @@
+Diagnostics:
+  Suppress:
+    - drv_unsupported_opt_for_target # why not works?
+  
+CompileFlags:
+  Remove: -m* # this works

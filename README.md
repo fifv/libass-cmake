@@ -34,6 +34,11 @@ The purpose is to cross-compile to WebAssembly via emscripten
 ### TODO
 - [ ] currently fribidi and libass' configurations are skipped and I put the generated `config.h` directly in `./configs/`, that's expected as I want control the configurations. But it may be broken someday, so it will be better to invent some method address this issue
 
-- [ ] actually build this with emscripten and built a backend in typescript which import this project to test functionality
+- [x] actually build this with emscripten and built a backend in typescript which import this project to test functionality
+  
+  -  I have successfully compiled with emscripten and the libass/test/test.c can also be runned. It requires libpng, which I use emscripten's builtin port
 
 
+### Note
+
+* You need `clang` installed in PATH, because `fribidi` will build some simple programs on host to generate some header
