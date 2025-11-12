@@ -3,7 +3,12 @@ project(libass-cmake VERSION 0.1.0)
 
 set(CMAKE_COLOR_DIAGNOSTICS ON)
 
-add_link_options($<$<CONFIG:RELEASE>:-s>)
+### !!! this! emscripten's bug
+### emscripten's toolchain set the clang-scan-deps to /usr/bin/emscan-deps, 
+### which try to call /opt/emscripten-llvm/bin/clang-scan-deps, which doesn't exist
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
+
+# add_link_options($<$<CONFIG:RELEASE>:-s>)
 
 #####
 # 1. fribidi
@@ -13,10 +18,50 @@ add_link_options($<$<CONFIG:RELEASE>:-s>)
 #
 # fontconfig is opt-out
 
+### dramatic improvement!!!! only tako: 66ms old: 51ms  now: 31ms !!!!  (shiori, release, default resolution, beasters 3.0s)
+### simd is the GOAT, 66ms -> 31ms, lto seems no effect. set them on libass is enough
+add_compile_options(
+    $<$<CONFIG:Release>:-fno-exceptions>
+
+    $<$<CONFIG:Release>:-flto> # is it useful here?
+
+    # ## simd is used at compile time
+    # ## these simd won't be benefit to string::find, also no benefit to blendSingle...
+    # -msimd128
+    # -msse
+    # -msse2
+    # -msse3
+    # -mssse3
+    # -msse4
+    # -msse4
+    # -msse4
+    # -mavx
+    # -matomics
+)
+add_link_options(
+    -sALLOW_MEMORY_GROWTH # required if consumed mem > 16MB
+
+    # --embind-emit-tsd tako.d.ts -sERROR_ON_UNDEFINED_SYMBOLS=0
+    $<$<CONFIG:Debug>:-O0> # 7.7s -> 5s
+    $<$<CONFIG:Debug>:-sERROR_ON_WASM_CHANGES_AFTER_LINK> # 7.7s -> 5s
+    $<$<CONFIG:Debug>:-sWASM_BIGINT> # 7.7s -> 5s
+    $<$<CONFIG:Release>:-flto> # 5s -> 30s, also if deps are COMPILED with lto, will cause like SLOW
+
+    $<$<CONFIG:Release>:-fno-exceptions>
+
+    # -O3
+    # -g1 # This seems only affect js? Seems won't affect build time. Doc: -g1: When linking, preserve whitespace in JavaScript.
+    # -g3 # This affect wasm, but speed up (5s->3s)
+    # --closure 1 # This reduce js size a lot, but increase build time (4s->11s). This won't be used when --config Debug, but needed in Release
+    # $<$<CONFIG:Release>:--closure=2> # Works!
+    $<$<CONFIG:Release>:--closure=1>
+    # $<$<CONFIG:Release>:1> # Works!
+)
 
 ### note: emscripten has builtin freetype and harfbuzz
 add_subdirectory(freetype 3rd/freetype)
 add_subdirectory(harfbuzz 3rd/harfbuzz)
+# target_compile_options(freetype PRIVATE -O3) # seems no effect 
 
 ### cmake doesn't support use env and pkg-config...
 # set(ENV{PKG_CONFIG_PATH} /home/fifv/c/trylibass/fribidi/builddir/dist/usr/local/lib/pkgconfig)
@@ -60,10 +105,27 @@ target_link_directories(ass PRIVATE
 
 )
 target_link_libraries(ass PRIVATE
+    # --use-port=freetype
+    # --use-port=harfbuzz
     freetype
     harfbuzz
     fribidi
     unibreak
+)
+target_compile_options(ass PRIVATE
+    # --use-port=harfbuzz
+    -msimd128
+    -msse
+    -msse2
+    -msse3
+    -mssse3
+    -msse4
+    -msse4
+    -msse4
+    -mavx
+    -matomics
+
+    -O3 # effect VERY OBVIOUS 200ms -> 44ms in Debug
 )
 
 ###### libunibreak ######
@@ -79,11 +141,14 @@ add_library(unibreak STATIC
     libunibreak/src/graphemebreak.c
     libunibreak/src/wordbreak.c
 )
+target_include_directories(unibreak PUBLIC
+    libunibreak/src
+)
 
 ###### fribidi ######
 
-
-set(fribidi_gentab_dir ${CMAKE_SOURCE_DIR}/fribidi/gen.tab)
+### should be current, so external cmake can build this well
+set(fribidi_gentab_dir ${CMAKE_CURRENT_SOURCE_DIR}/fribidi/gen.tab)
 set(fribidi_output_dir ${CMAKE_BINARY_DIR}/3rd/fribidi)
 
 add_library(fribidi STATIC
@@ -207,3 +272,9 @@ add_executable(ass_test
     libass/test/test.c
 )
 target_link_libraries(ass_test PUBLIC ass)
+target_link_options(ass_test PRIVATE --use-port=libpng) # i'm too lazy to compile libpng from source, just use port
+target_compile_options(ass_test PRIVATE --use-port=libpng)
+
+
+
+
